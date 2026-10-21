@@ -22,7 +22,7 @@ output_grid :: proc(grid: Grid) {
 
 		switch side {
 			case Side.None:
-				fmt.print("~")
+				fmt.print(i)
 			case Side.X:
 				fmt.print("X")
 			case Side.O:
@@ -94,7 +94,10 @@ check_win_for_side :: proc(grid: ^Grid, side: Side) -> bool {
 		(grid[3] == side && grid[4] == side && grid[5] == side) ||
 		(grid[6] == side && grid[7] == side && grid[8] == side) ||
 		(grid[0] == side && grid[4] == side && grid[8] == side) ||
-		(grid[2] == side && grid[4] == side && grid[6] == side)
+		(grid[2] == side && grid[4] == side && grid[6] == side) ||
+		(grid[0] == side && grid[3] == side && grid[6] == side) ||
+		(grid[1] == side && grid[4] == side && grid[7] == side) ||
+		(grid[2] == side && grid[5] == side && grid[8] == side)
 	{
 		return true		
 	}
@@ -171,16 +174,19 @@ main :: proc() {
 			}
 
 			if doesWinnerExist || allSlotsFilled {
+				output_grid(grid)
 				fmt.print("Play again? Y/n\n")
 
 				line: Maybe(string) = accept_input(&reader)
-				if line == nil {
-					continue
+				unwrapped_line, ok := line.?
+				if !ok {
+					fmt.println("There was an issue reading input!")
+					os.exit(1)
 				}
 
 				breakOut := false
-				switch strings.to_upper(line.?[0:1]) {
-					case "N":
+				switch strings.trim_space(unwrapped_line)[0] {
+					case 'n', 'N':
 						breakOut = true
 					case:
 						turnOfSide = Side.X
@@ -190,6 +196,7 @@ main :: proc() {
 							Side.None, Side.None, Side.None
 						}
 				}
+				delete(unwrapped_line)
 
 				if breakOut {
 					break
